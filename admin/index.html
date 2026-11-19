@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockLite Admin — Dashboard Inventaris</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-icon">S</div><span>StockLite</span></div>
+    <div class="nav-label">MENU UTAMA</div>
+    <a class="nav active" href="./"><span>▦</span> Dashboard</a>
+    <a class="nav" href="http://127.0.0.1:5000/api/items" target="_blank"><span>⌘</span> REST API <small>JSON</small></a>
+    <div class="side-note"><div class="pulse"></div><div><b>Server aktif</b><small>REST API terhubung</small></div></div>
+    <div class="sidebar-bottom">Proyek Web Service<br><b>RESTful API · Python Flask</b></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div><div class="eyebrow">MANAJEMEN INVENTARIS · ADMIN</div><h1>Dashboard</h1><p class="sub">Pantau dan kelola data barang melalui RESTful API.</p></div>
+      <div class="top-right"><span class="status"><i></i> API Online</span><div class="avatar">AD</div></div>
+    </header>
+
+    <section class="stats">
+      <article class="stat-card"><div class="stat-top"><span>Total jenis barang</span><span class="stat-icon purple">▤</span></div><strong id="totalItems">0</strong><small>Data barang terdaftar</small></article>
+      <article class="stat-card"><div class="stat-top"><span>Total stok barang</span><span class="stat-icon blue">▥</span></div><strong id="totalStock">0</strong><small>Jumlah seluruh unit</small></article>
+      <article class="stat-card"><div class="stat-top"><span>Stok menipis</span><span class="stat-icon orange">!</span></div><strong id="lowStock">0</strong><small>Barang dengan stok ≤ 5</small></article>
+    </section>
+
+    <section class="content-card">
+      <div class="card-heading">
+        <div><h2>Daftar Barang</h2><p>Data diambil langsung dari endpoint <code>GET /api/items</code> (tersinkronisasi dengan StockLite Customer).</p></div>
+        <button class="primary" id="addBtn">＋ Tambah Barang</button>
+      </div>
+      <div class="toolbar"><div class="search">⌕ <input id="searchInput" placeholder="Cari nama barang..."></div><button class="outline" id="refreshBtn">↻ Muat ulang</button></div>
+      <div class="table-wrap">
+        <table><thead><tr><th>ID</th><th>NAMA BARANG</th><th>HARGA</th><th>STOK</th><th>STATUS</th><th class="right">AKSI</th></tr></thead><tbody id="itemsBody"><tr><td colspan="6" class="empty">Memuat data...</td></tr></tbody></table>
+      </div>
+      <div class="table-foot"><span id="tableCount">Menampilkan 0 barang</span><span>Terhubung melalui <b>REST API</b></span></div>
+    </section>
+
+    <section class="api-info">
+      <div class="api-title"><div class="api-symbol">{ }</div><div><h3>Web Service berjalan</h3><p>Dashboard Admin dan StockLite Customer berbagi sumber data barang yang sama melalui HTTP dan JSON.</p></div></div>
+      <div class="api-tags"><span>GET</span><span>POST</span><span>PUT</span><span>DELETE</span><span class="middleware">Middleware: Request Logging</span></div>
+    </section>
+    <footer>StockLite Admin · Demo tugas Layanan Web Service <span>Python Flask</span></footer>
+  </main>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <form class="modal" id="itemForm">
+      <div class="modal-head"><div><h2 id="modalTitle">Tambah Barang</h2><p>Isi informasi barang di bawah ini.</p></div><button type="button" class="close" id="closeModal">×</button></div>
+      <label>Nama barang<input id="itemName" required maxlength="80" placeholder="Contoh: Keyboard Wireless"></label>
+      <label>Harga (Rp)<input id="itemPrice" required type="number" min="0" step="500" placeholder="Contoh: 150000"></label>
+      <label>Jumlah stok<input id="itemStock" required type="number" min="0" step="1" placeholder="Contoh: 10"></label>
+      <label>Deskripsi singkat<input id="itemDesc" maxlength="200" placeholder="Opsional: keterangan produk untuk katalog Customer"></label>
+      <label>URL Gambar (opsional)<input id="itemImage" placeholder="Kosongkan untuk gambar otomatis"></label>
+      <div class="modal-actions"><button type="button" class="outline" id="cancelBtn">Batal</button><button class="primary" type="submit" id="saveBtn">Simpan Barang</button></div>
+      <p class="form-error" id="formError"></p>
+    </form>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>

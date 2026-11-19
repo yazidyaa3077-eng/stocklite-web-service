@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StockLite Customer — Toko Online Terintegrasi</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Sidebar Navigasi -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">S</div>
+      <div>
+        <span>StockLite</span>
+        <small class="brand-sub">Customer Store</small>
+      </div>
+    </div>
+
+    <div class="nav-label">TOKO ONLINE</div>
+    <button class="nav active" data-page="home"><span>⌂</span> Beranda</button>
+    <button class="nav" data-page="catalog"><span>▤</span> Katalog Produk</button>
+    <button class="nav" data-page="detail"><span>◈</span> Detail Produk</button>
+    <button class="nav" data-page="cart">
+      <span>🛒</span> Keranjang
+      <em class="nav-badge" id="sidebarCartBadge">0</em>
+    </button>
+    <button class="nav" data-page="checkout"><span>✓</span> Checkout</button>
+
+    <div class="nav-label" style="margin-top:16px">AKUN SAYA</div>
+    <button class="nav" data-page="history"><span>◷</span> Riwayat Pesanan</button>
+    <button class="nav" data-page="profile"><span>☺</span> Profil Saya</button>
+
+    <div class="side-note">
+      <div class="pulse" id="apiPulse"></div>
+      <div>
+        <b id="apiSideTitle">Sinkronisasi Aktif</b>
+        <small id="apiSideSub">Terhubung ke StockLite Admin</small>
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      RESTful Web Service<br>
+      <b>API: http://127.0.0.1:5000</b>
+    </div>
+  </aside>
+
+  <!-- Konten Utama -->
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow" id="pageEyebrow">STOCKLITE STOREFRONT</div>
+        <h1 id="pageTitle">Beranda</h1>
+        <p class="sub" id="pageSub">Belanja produk langsung dari inventaris StockLite Admin secara real-time.</p>
+      </div>
+      <div class="top-right">
+        <button class="outline sync-btn" id="globalRefreshBtn" title="Sinkronkan stok terbaru dari Admin">↻ Sinkronkan Stok</button>
+        <span class="status" id="apiStatusBadge"><i></i> API Online</span>
+        <button class="cart-pill" id="topCartBtn">🛒 Keranjang (<span id="topCartCount">0</span>)</button>
+      </div>
+    </header>
+
+    <!-- 1. HALAMAN BERANDA -->
+    <section class="view active" id="view-home">
+      <div class="hero-banner">
+        <div class="hero-copy">
+          <span class="hero-tag">TERHUBUNG LANGSUNG KE STOCKLITE ADMIN</span>
+          <h2>Belanja Kebutuhan Akademik &amp; Teknologi dengan Stok Real-Time</h2>
+          <p>Setiap perubahan stok, penambahan produk, atau penghapusan barang di StockLite Admin langsung diperbarui otomatis di katalog ini melalui REST API.</p>
+          <div class="hero-actions">
+            <button class="primary" onclick="navigateTo('catalog')">Jelajahi Katalog Produk</button>
+            <button class="outline" onclick="navigateTo('history')">Cek Riwayat Pesanan</button>
+          </div>
+        </div>
+        <div class="hero-metrics">
+          <div class="metric-box">
+            <span class="metric-label">Produk Tersedia</span>
+            <strong id="homeAvailableProducts">0</strong>
+            <small>Item siap dibeli (stok &gt; 0)</small>
+          </div>
+          <div class="metric-box">
+            <span class="metric-label">Total Unit Stok</span>
+            <strong id="homeTotalUnits">0</strong>
+            <small>Sinkron dari <code>/api/items</code></small>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div>
+          <h2>Katalog Pilihan &amp; Pencarian Cepat</h2>
+          <p id="homeCatalogSummary">Menampilkan 0 produk tersedia</p>
+        </div>
+        <div class="search-bar">
+          <span>⌕</span>
+          <input type="text" id="homeSearchInput" placeholder="Cari nama produk secara langsung...">
+        </div>
+      </div>
+
+      <div class="product-grid" id="homeProductGrid">
+        <div class="empty-card">Memuat katalog produk dari server...</div>
+      </div>
+    </section>
+
+    <!-- 2. HALAMAN KATALOG PRODUK -->
+    <section class="view" id="view-catalog">
+      <div class="content-card">
+        <div class="card-heading">
+          <div>
+            <h2>Semua Produk</h2>
+            <p id="catalogCountInfo">Menampilkan 0 produk dari backend StockLite Admin</p>
+          </div>
+          <div class="catalog-controls">
+            <div class="search-bar">
+              <span>⌕</span>
+              <input type="text" id="catalogSearchInput" placeholder="Ketik nama produk...">
+            </div>
+            <select id="stockFilterSelect" class="select-input">
+              <option value="all">Semua Status Stok</option>
+              <option value="available">Stok Tersedia (&gt; 0)</option>
+              <option value="out">Stok Habis (0)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="product-grid" id="catalogProductGrid" style="margin-top:20px">
+          <div class="empty-card">Memuat produk...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. HALAMAN DETAIL PRODUK -->
+    <section class="view" id="view-detail">
+      <div class="detail-nav">
+        <button class="outline" onclick="navigateTo('catalog')">← Kembali ke Katalog</button>
+      </div>
+      <div class="content-card" id="productDetailContainer">
+        <div class="empty-card">Pilih salah satu produk dari Beranda atau Katalog untuk melihat detail lengkapnya.</div>
+      </div>
+    </section>
+
+    <!-- 4. HALAMAN KERANJANG -->
+    <section class="view" id="view-cart">
+      <div class="cart-layout">
+        <div class="content-card">
+          <div class="card-heading">
+            <div>
+              <h2>Keranjang Belanja</h2>
+              <p>Jumlah pembelian otomatis dibatasi sesuai stok aktual di StockLite Admin.</p>
+            </div>
+            <button class="outline" id="clearCartBtn">Kosongkan Keranjang</button>
+          </div>
+          <div id="cartItemsContainer" class="cart-list"></div>
+        </div>
+
+        <div class="content-card summary-card">
+          <h2>Ringkasan Belanja</h2>
+          <div class="summary-row"><span>Total Jenis Produk</span><strong id="cartTotalKinds">0 jenis</strong></div>
+          <div class="summary-row"><span>Total Jumlah Unit</span><strong id="cartTotalQty">0 unit</strong></div>
+          <div class="summary-divider"></div>
+          <div class="summary-row total"><span>Total Harga</span><strong id="cartGrandTotal">Rp 0</strong></div>
+          <button class="primary full-btn" id="proceedCheckoutBtn" onclick="navigateTo('checkout')">Lanjut ke Checkout →</button>
+          <p class="hint-text">Stok akhir akan divalidasi ulang di server saat tombol Buat Pesanan ditekan.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. HALAMAN CHECKOUT -->
+    <section class="view" id="view-checkout">
+      <div class="checkout-layout">
+        <form class="content-card" id="checkoutForm">
+          <div class="card-heading">
+            <div>
+              <h2>Informasi Pengiriman Pelanggan</h2>
+              <p>Data profil tersimpan otomatis terisi jika email sudah terdaftar.</p>
+            </div>
+            <button type="button" class="outline" id="fillFromProfileBtn">Isi dari Profil Saya</button>
+          </div>
+
+          <div class="form-grid">
+            <label>Nama Lengkap Pelanggan *
+              <input type="text" id="checkoutName" required placeholder="Masukkan nama lengkap">
+            </label>
+            <label>Email Pelanggan *
+              <input type="email" id="checkoutEmail" required placeholder="contoh@email.com">
+            </label>
+            <label>Nomor Telepon *
+              <input type="tel" id="checkoutPhone" required placeholder="08xxxxxxxxxx">
+            </label>
+            <label class="full-span">Alamat Lengkap Pengiriman *
+              <textarea id="checkoutAddress" rows="3" required placeholder="Nama jalan, nomor rumah, kelurahan, kecamatan, kota"></textarea>
+            </label>
+          </div>
+
+          <div class="checkout-notice">
+            <strong>Validasi Stok Backend:</strong> Pesanan dikirim ke <code>POST /api/customer/orders</code>. Jika stok tidak mencukupi karena dibeli pelanggan lain atau diubah Admin, transaksi otomatis ditolak dan stok tidak berubah sebagian.
+          </div>
+
+          <p class="form-error" id="checkoutError"></p>
+
+          <div class="checkout-actions">
+            <button type="button" class="outline" onclick="navigateTo('cart')">← Kembali ke Keranjang</button>
+            <button type="submit" class="primary" id="placeOrderBtn">Buat Pesanan Sekarang</button>
+          </div>
+        </form>
+
+        <div class="content-card summary-card">
+          <h2>Ringkasan Pesanan</h2>
+          <div id="checkoutSummaryList" class="checkout-items"></div>
+          <div class="summary-divider"></div>
+          <div class="summary-row"><span>Total Item</span><strong id="checkoutTotalQty">0 unit</strong></div>
+          <div class="summary-row total"><span>Total Pembayaran</span><strong id="checkoutGrandTotal">Rp 0</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. HALAMAN RIWAYAT PESANAN -->
+    <section class="view" id="view-history">
+      <div class="content-card">
+        <div class="card-heading">
+          <div>
+            <h2>Riwayat Pesanan Pelanggan</h2>
+            <p>Filter riwayat transaksi berdasarkan identitas email pelanggan dari <code>GET /api/customer/orders?email=</code>.</p>
+          </div>
+        </div>
+
+        <form class="history-filter" id="historyFilterForm">
+          <div class="search-bar" style="flex:1;max-width:400px">
+            <span>✉</span>
+            <input type="email" id="historyEmailInput" required placeholder="Masukkan email pelanggan untuk melihat riwayat...">
+          </div>
+          <button type="submit" class="primary">Tampilkan Riwayat</button>
+        </form>
+
+        <div id="historyOrdersContainer" class="orders-list">
+          <div class="empty-card">Masukkan email pelanggan di atas untuk memuat riwayat pesanan.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. HALAMAN PROFIL SAYA -->
+    <section class="view" id="view-profile">
+      <div class="profile-layout">
+        <form class="content-card" id="profileForm">
+          <div class="card-heading">
+            <div>
+              <h2>Profil Saya</h2>
+              <p>Kelola data identitas pelanggan melalui <code>GET / POST /api/customer/profile</code>.</p>
+            </div>
+            <button type="button" class="outline" id="loadProfileBtn">Muat Profil via Email</button>
+          </div>
+
+          <div class="form-grid">
+            <label>Nama Lengkap *
+              <input type="text" id="profileName" required placeholder="Nama lengkap Anda">
+            </label>
+            <label>Email (Identitas Utama) *
+              <input type="email" id="profileEmail" required placeholder="email@domain.com">
+            </label>
+            <label>Nomor Telepon *
+              <input type="tel" id="profilePhone" required placeholder="08xxxxxxxxxx">
+            </label>
+            <label class="full-span">Alamat Pengiriman *
+              <textarea id="profileAddress" rows="3" required placeholder="Alamat lengkap pengiriman"></textarea>
+            </label>
+          </div>
+
+          <p class="form-error" id="profileError"></p>
+
+          <div class="checkout-actions">
+            <button type="submit" class="primary" id="saveProfileBtn">Simpan / Perbarui Profil</button>
+          </div>
+        </form>
+
+        <div class="content-card summary-card">
+          <h2>Info Akun &amp; Penyimpanan</h2>
+          <p class="info-para">Email digunakan sebagai identitas untuk menghubungkan <b>Profil Saya</b>, auto-fill saat <b>Checkout</b>, dan filter pada <b>Riwayat Pesanan</b>.</p>
+          <div class="summary-divider"></div>
+          <p class="info-para muted">Catatan Prototipe: Data pesanan dan profil disimpan sementara di memori server Python Flask dan akan ter-reset apabila server backend dimatikan.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      StockLite Customer · Terintegrasi dengan StockLite Admin via REST API
+      <span>Python Flask + Vanilla JS</span>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
